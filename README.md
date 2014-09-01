@@ -170,21 +170,16 @@ logstash-forwarder.crt bütün serverlara kopyalandı ve log göndermeye hazır 
 
 içine;
 
+```
 > input {
-
 >   lumberjack {
-
 >     port => 5000
-
 >     type => "logs"
-
 >     ssl_certificate => "/etc/pki/tls/certs/logstash-forwarder.crt"
-
 >     ssl_key => "/etc/pki/tls/private/logstash-forwarder.key"
-
 >   }
-
 > }
+```
 
 Syslog mesajlarımızı almak ve filtrelemek için;
 

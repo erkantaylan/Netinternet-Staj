@@ -1,6 +1,8 @@
 Elasticsearch-Logstash-Kibana
 =============================
 
+![alt tag](http://logstash.net/images/logstash.png)
+
 Logstash logları almak, işlemek ve bunları sunmak için bir programdır. Her türden logları kullanabilir. Sistem logları, web sunucu logları, hata logları ve uygulama loglarını tutar, istediğiniz tür log gönderebilirsiniz.
 
 Logları kaydetmek için elasticsearch ve raporlama için kibanayı kullanacağız. Logstash her ne kadar çok etkili bir tool olsada elasticsearch, kibana gibi yan uygulamar olmadan pek kullanışlı değildir.
@@ -21,8 +23,9 @@ Java 7 Kurulum
 Java 7 olmasının sebebe elasticsearch için önerilen java versiyonu olmasıdır.
 
 Depoya javayı ekle
-
-> sudo add-apt-repository -y ppa:webupd8team/java
+```
+ sudo add-apt-repository -y ppa:webupd8team/java
+```
 
 Servera kurarken üstteki kod çalışmıyor. Bunun için
 
@@ -186,48 +189,34 @@ Syslog mesajlarımızı almak ve filtrelemek için;
 > sudo nano /etc/logstash/conf.d/10-syslog.conf
 
 içine :
-
-> filter {
-
->   if [type] == "syslog" {
-
->     grok {
-
->       match => { "message" => "%{SYSLOGTIMESTAMP:syslog_timestamp} %{SYSLOGHOST:syslog_hostname} 
+```
+filter {
+ if [type] == "syslog" {
+   grok {
+     match => { "message" => "%{SYSLOGTIMESTAMP:syslog_timestamp} %{SYSLOGHOST:syslog_hostname} 
 %{DATA:syslog_program}(?:\[%{POSINT:syslog_pid}\])?: %{GREEDYDATA:syslog_message}" }
-
->       add_field => [ "received_at", "%{@timestamp}" ]
-
->       add_field => [ "received_from", "%{host}" ]
-
->     }
-
->     syslog_pri { }
-
->     date {
-
->       match => [ "syslog_timestamp", "MMM  d HH:mm:ss", "MMM dd HH:mm:ss" ]
-
->     }
-
->   }
-
-> }
-
+     add_field => [ "received_at", "%{@timestamp}" ]
+     add_field => [ "received_from", "%{host}" ]
+   }
+   syslog_pri { }
+   date {
+     match => [ "syslog_timestamp", "MMM  d HH:mm:ss", "MMM dd HH:mm:ss" ]
+   }
+ }
+}
+```
 yazıp kaydedelim. Bu ayar dosyası gelen syslog mesajını grok standartına göre filtreleyelip parse eder ve daha sorgulanabilir hale getirir.
 Son olarak;
 
 > sudo nano /etc/logstash/conf.d/30-lumberjack-output.conf
 
 içine :
-
-> output {
-
->   elasticsearch { host => localhost }
-
->   stdout { codec => rubydebug }
-
-> }
+```
+output {
+   elasticsearch { host => localhost }
+   stdout { codec => rubydebug }
+}
+```
 
 bu ayarda gelen filtrelenmiş logların çıktısını elasticsearche gönderir.
 
@@ -278,39 +267,24 @@ Logstash Forwarderımız için config dosyasını düzenleyelim
 
 logstash_server_private_IP yazan yere serverımızın ip'sini yazacağız.
 içine;
-
-> {
-
->   "network": {
-
->     "servers": [ "logstash_server_private_IP:5000" ],
-
->     "timeout": 15,
-
->     "ssl ca": "/etc/pki/tls/certs/logstash-forwarder.crt"
-
->   },
-
->   "files": [
-
->     {
-
->       "paths": [
-
->         "/var/log/syslog",
-
->         "/var/log/auth.log"
-
->        ],
-
->       "fields": { "type": "syslog" }
-
->     }
-
->    ]
-
-> }
-
+```
+{
+ "network": {
+   "servers": [ "logstash_server_private_IP:5000" ],
+   "timeout": 15,
+   "ssl ca": "/etc/pki/tls/certs/logstash-forwarder.crt"
+ },
+ "files": [
+   {
+     "paths": [
+       "/var/log/syslog",
+       "/var/log/auth.log"
+      ],
+     "fields": { "type": "syslog" }
+   }
+  ]
+}
+```
 kaydedip çıkalım. Bu dosya Logstash Forwarderımızla Logstashımızı 5000 nolu portu kullanarak logların aktarımını sağlar. (Bunu yaparkende bizim oluşturup kopyaladığımız SSL Sertifikasını kullanır)
 
 > sudo service logstash-forwarder restart

@@ -1,0 +1,1 @@
+ Logstash'e plugin yazmak için ruby yazmak gerektiği ve ben ruby bilmediğim için kendim plugin yazmadım ama `http://logstash.net/docs/1.4.2/extending/`http://logstash.net/docs/1.4.2/extending/` buradan bir plugin'in nasıl yazıldığının detaylarına bakabilirsiniz.
